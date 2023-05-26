@@ -6,3 +6,14 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.obsidian-todo-note-highlighter {
+	position: absolute;
+	width: 15px;
+	height: 15px;
+	background-color: yellow;
+	border-radius: 50%;
+	right: 5px;
+	top: 50%;
+	transform: translateY(-50%);
+}
