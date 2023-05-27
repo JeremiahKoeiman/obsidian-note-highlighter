@@ -7,11 +7,16 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-.obsidian-todo-note-indicator {
+:root {
+	--note-highlighter-size: 15px;
+	--note-highlighter-color: rgb(0, 0, 0);
+}
+
+.obsidian-todo-note-highlighter {
 	position: absolute;
-	width: 15px;
-	height: 15px;
-	background-color: yellow;
+	width: var(--note-highlighter-size);
+	height: var(--note-highlighter-size);
+	background-color: var(--note-highlighter-color);
 	border-radius: 50%;
 	right: 5px;
 	top: 50%;

@@ -1,39 +1,58 @@
 import { Plugin, TFile, Vault } from "obsidian";
+import { ObsidianNoteHighlighterSettingTab } from "./settings";
+import {
+	CSS_CLASS,
+	DATA_OBSIDIAN_TODOS_INDICATOR,
+	DEFAULT_SETTINGS,
+	IMappedFile,
+	NOTE_INDICATOR,
+	ObsidianNoteHighlighterSettings,
+	hex2rgb,
+} from "./util";
 
-interface IMappedFile {
-	name: string;
-	path: string;
-	content: string;
-	matches: number;
-}
-
-const NOTE_INDICATOR = "note-indicator";
-const DATA_OBSIDIAN_TODOS_INDICATOR = "data-obsidian-todos-indicator";
-const CSS_CLASS = "obsidian-todo-note-indicator";
-
-export default class ObsidianTodos extends Plugin {
-	// TODO: Make width&height/color adjustible in css via settings
+export default class ObsidianNoteHighlighter extends Plugin {
+	public settings: ObsidianNoteHighlighterSettings;
 
 	private _fileExplorerContainer: HTMLElement;
 	private _todoRegex = /TODO/gi;
-	private _initialLoad = true;
 
-	async onload() {
+	public async onload() {
 		const { vault, workspace } = this.app;
+
+		await this.loadSettings();
+
+		document.addEventListener(
+			"settings-updated",
+			this.applySettingsToHighlighter
+		);
 
 		workspace.onLayoutReady(async () => {
 			this._fileExplorerContainer =
 				workspace.getLeavesOfType("file-explorer")[0]?.view.containerEl;
 
-			await this.addIndicatorToNoteInFileExplorer(vault);
+			await this.addHighlighterToNoteInFileExplorer(vault);
+
+			const rgb = hex2rgb(this.settings.highlighterColor);
+
+			document.documentElement.style.setProperty(
+				"--note-indicator-size",
+				`${this.settings.highlighterSize}px`
+			);
+			document.documentElement.style.setProperty(
+				"--note-indicator-color",
+				`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+			);
 		});
 
 		this.registerEvent(
 			vault.on("modify", async (file: TFile) => {
-				const mappedFile = await this.mapFileToIMappedFile(vault, file);
+				const mappedFile = await this.mapIFileToIMappedFile(
+					vault,
+					file
+				);
 
 				if (mappedFile.matches > 0) {
-					this.appendIndicatorElementToWrapper(mappedFile);
+					this.appendHighlighterElementToWrapper(mappedFile);
 				} else {
 					const indicatorToDelete = this.geFileExplorerNoteElement(
 						mappedFile.path
@@ -43,20 +62,49 @@ export default class ObsidianTodos extends Plugin {
 				}
 			})
 		);
+
+		this.addSettingTab(
+			new ObsidianNoteHighlighterSettingTab(this.app, this)
+		);
 	}
 
-	private async addIndicatorToNoteInFileExplorer(
+	public async loadSettings() {
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
+	}
+
+	public async saveSettings() {
+		await this.saveData(this.settings);
+	}
+
+	private applySettingsToHighlighter(event: CustomEvent): void {
+		const rgb = hex2rgb(event.detail.highlighterColor);
+
+		document.documentElement.style.setProperty(
+			"--note-highlighter-size",
+			`${event.detail.highlighterSize}px`
+		);
+		document.documentElement.style.setProperty(
+			"--note-highlighter-color",
+			`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+		);
+	}
+
+	private async addHighlighterToNoteInFileExplorer(
 		vault: Vault
 	): Promise<void> {
 		const files = await this.getFilesWithMatchesAndContents(vault);
 		files.forEach((file: IMappedFile) => {
-			this.appendIndicatorElementToWrapper(file);
+			this.appendHighlighterElementToWrapper(file);
 		});
 	}
 
-	private appendIndicatorElementToWrapper(file: IMappedFile): void {
+	private appendHighlighterElementToWrapper(file: IMappedFile): void {
 		const noteWrapperElement = this.geFileExplorerNoteElement(file.path);
-		const indicator = this.createIndicatorElement();
+		const indicator = this.createHighlighterElement();
 
 		if (noteWrapperElement) {
 			noteWrapperElement.classList.add("relative");
@@ -64,7 +112,7 @@ export default class ObsidianTodos extends Plugin {
 		}
 	}
 
-	private createIndicatorElement(): HTMLElement {
+	private createHighlighterElement(): HTMLElement {
 		const indicator = document.createElement("div");
 		indicator.setAttribute(DATA_OBSIDIAN_TODOS_INDICATOR, NOTE_INDICATOR);
 		indicator.classList.add(CSS_CLASS);
@@ -77,7 +125,7 @@ export default class ObsidianTodos extends Plugin {
 		const files = vault.getMarkdownFiles();
 		const mappedFiles = files.map(
 			async (file: TFile): Promise<IMappedFile> =>
-				this.mapFileToIMappedFile(vault, file)
+				await this.mapIFileToIMappedFile(vault, file)
 		);
 
 		const promises = await Promise.all(mappedFiles);
@@ -86,7 +134,7 @@ export default class ObsidianTodos extends Plugin {
 		);
 	}
 
-	private async mapFileToIMappedFile(
+	private async mapIFileToIMappedFile(
 		vault: Vault,
 		file: TFile
 	): Promise<IMappedFile> {
@@ -113,5 +161,10 @@ export default class ObsidianTodos extends Plugin {
 		);
 	}
 
-	onunload() {}
+	public onunload() {
+		document.removeEventListener(
+			"settings-updated",
+			this.applySettingsToHighlighter
+		);
+	}
 }
