@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-note-highlighter-plugin",
-	"name": "Obsidian Note Highlighter",
+	"id": "note-highlighter",
+	"name": "Note Highlighter",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This plugin will highlight the notes that have 1 or more todos.",
+	"description": "This plugin will highlight the notes that have 1 or more todos in them.",
 	"author": "Jeremiah Koeiman",
-	"authorUrl": "https://github.com/JeremiahKoeiman/",
+	"authorUrl": "https://github.com/JeremiahKoeiman/obsidian-note-highlighter",
 	"isDesktopOnly": false
 }
