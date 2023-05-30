@@ -3,7 +3,7 @@
 	"name": "Note Highlighter",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This plugin will highlight the notes that have 1 or more todos in them.",
+	"description": "Highlights the notes that have 1 or more todos in them.",
 	"author": "Jeremiah Koeiman",
 	"authorUrl": "https://github.com/JeremiahKoeiman/obsidian-note-highlighter",
 	"isDesktopOnly": false

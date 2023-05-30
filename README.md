@@ -1,6 +1,6 @@
 # Obsidian Note Highlighter Plugin
 
-This is a simple plugin for [Obsidian](https://obsidian.md), that will highlight the notes that have 1 or more todos.
+Highlights the notes that contain 1 or more todos.
 
 ## How does it work?
 
@@ -10,7 +10,7 @@ If you have no `TODO`'s anymore in a note, the highlighter will be removed.
 
 ## Make it your own
 
-There are 2 settings you can edit for this plugin:
+There are 2 settings you can edit:
 
 -   Size: this will change the size of the highlighter. This can be max 25. Default size is 15.
 -   Color: you can use the color picker to change the color of the highlighter. Default color is black.
